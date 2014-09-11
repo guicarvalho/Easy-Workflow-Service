@@ -1,17 +1,16 @@
 # coding: utf-8
 
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 
 
 class UserProfileManager(BaseUserManager):
-
-    def create_user(self, username, password, email, first_name, last_name, protocol, fone_number,
+    def create_user(self, username, password, email, role, first_name, last_name, protocol, fone_number,
                     cel_number, is_active):
         if not email:
-            raise ValueError('The given email must be set')
+            raise ValueError(_('The given email must be set'))
 
         now = timezone.now()
 
@@ -19,6 +18,7 @@ class UserProfileManager(BaseUserManager):
         user = self.model(
             username=username,
             email=email,
+            role=role,
             first_name=first_name,
             last_name=last_name,
             date_joined=now,
@@ -27,7 +27,7 @@ class UserProfileManager(BaseUserManager):
             fone_number=fone_number,
             cel_number=cel_number,
             is_active=is_active,
-            )
+        )
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -43,6 +43,7 @@ class UserProfile(AbstractBaseUser):
     protocol = models.CharField(_('protocol'), max_length=9, blank=False, )
     fone_number = models.CharField(_('fone_number'), max_length=10, blank=True, )
     cel_number = models.CharField(_('cel_number'), max_length=10, blank=True, )
+    role = models.CharField(_('role'), max_length=30, blank=False, )
 
     objects = UserProfileManager()
 
