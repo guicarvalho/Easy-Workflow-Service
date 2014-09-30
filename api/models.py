@@ -1,9 +1,11 @@
 # coding: utf-8
 
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, User
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, User
+
+from rest_framework.authtoken.models import Token
 
 
 class UserProfileManager(BaseUserManager):
@@ -13,6 +15,7 @@ class UserProfileManager(BaseUserManager):
             raise ValueError(_('The given email must be set'))
 
         now = timezone.now()
+
 
         email = self.normalize_email(email)
         user = self.model(
@@ -28,8 +31,12 @@ class UserProfileManager(BaseUserManager):
             cel_number=cel_number,
             is_active=is_active,
         )
+        
         user.set_password(password)
         user.save(using=self._db)
+        
+        Token.objects.create(user=user)
+        
         return user
 
 
