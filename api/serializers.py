@@ -14,4 +14,4 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class RequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Request
-        fields = ('description', 'date', 'equipment', 'nature', 'status', 'priority', 'who_requested', 'who_executed',)
+        fields = ('id', 'description', 'date', 'equipment', 'nature', 'status', 'priority', 'who_requested', 'who_executed',)

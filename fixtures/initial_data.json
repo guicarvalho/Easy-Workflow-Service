@@ -123,6 +123,21 @@
     }
 },
 {
+    "pk": 2,
+    "model": "api.request",
+    "fields": {
+        "status": "pending",
+        "who_executed": 1,
+        "description": "teste da API",
+        "nature": "teste",
+        "who_requested": 2,
+        "priority": "low",
+        "equipment": "pc 02",
+        "date": "2014-09-10",
+        "response": "teste"
+    }
+},
+{
     "pk": 1, 
     "model": "auth.permission", 
     "fields": {

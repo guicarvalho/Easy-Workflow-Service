@@ -54,3 +54,7 @@ docs/_build/
 
 # File of configuration (Django)
 settings.py
+
+# SQLite
+*.sqlite3
+*.db
