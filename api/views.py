@@ -70,3 +70,81 @@ class RequestList(APIView):
         serializer = RequestSerializer(requests, many=True)
 
         return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = RequestSerializer(data=request.DATA)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RequestListByUser(APIView):
+
+    REALIZED_STATUS = 'realized'
+    PENDIND_STATUS = 'pending'
+    DELAYED_STATUS = 'delayed'
+    CANCELED_STATUS = 'canceled'
+
+    def get_object(self, username):
+        try:
+            user = UserProfile.objects.filter(username=username).first()
+            requests_of_user = Request.objects.filter(who_executed=user.id).all()
+            
+            return requests_of_user
+
+        except UserProfile.DoesNotExists:
+            raise Http404
+
+    def get(self, request, username, format=None):
+        requests_of_user = self.get_object(username)
+        serializer = RequestSerializer(requests_of_user)
+
+        realized_tasks = 0
+        pending_tasks = 0
+        delayed_tasks = 0
+        canceled_tasks = 0
+
+        for r in requests_of_user:
+            
+            if r.status == self.REALIZED_STATUS:
+                realized_tasks += 1
+            
+            elif r.status == self.PENDIND_STATUS:
+                pending_tasks += 1
+            
+            elif r.status == self.DELAYED_STATUS:
+                delayed_tasks += 1
+            
+            elif r.status == self.CANCELED_STATUS:
+                canceled_tasks += 1
+
+        total_of_tasks = {
+            'username': username,
+            'realized': realized_tasks,
+            'pending': pending_tasks,
+            'delayed': delayed_tasks,
+            'canceled': canceled_tasks,
+        }
+
+        return Response(total_of_tasks)
+
+
+class RequestListAllByUser(APIView):
+
+    def get_object(self, username):
+        try:
+            user = UserProfile.objects.filter(username=username).first()
+            requests_of_user = Request.objects.filter(who_executed=user.id).all()
+            return requests_of_user
+
+        except UserProfile.DoesNotExists:
+            raise Http404
+
+    def get(self, request, username, format=None):
+        requests_of_user = self.get_object(username)
+        serializer = RequestSerializer(requests_of_user)
+
+        return Response(serializer.data)

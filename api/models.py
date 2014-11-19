@@ -16,7 +16,6 @@ class UserProfileManager(BaseUserManager):
 
         now = timezone.now()
 
-
         email = self.normalize_email(email)
         user = self.model(
             username=username,
@@ -34,7 +33,7 @@ class UserProfileManager(BaseUserManager):
         
         user.set_password(password)
         user.save(using=self._db)
-        
+
         Token.objects.create(user=user)
         
         return user
