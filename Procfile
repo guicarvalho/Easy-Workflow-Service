@@ -1,1 +1,1 @@
-web: gunicorn easy_workflow_service.wsgi --log-file -
+web: python manage.py runserver --settings=easy_workflow_service.settings
