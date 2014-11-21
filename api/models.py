@@ -30,6 +30,8 @@ class UserProfileManager(BaseUserManager):
             cel_number=cel_number,
             is_active=is_active,
         )
+
+        import ipdb; ipdb.set_trace()
         
         user.set_password(password)
         user.save(using=self._db)

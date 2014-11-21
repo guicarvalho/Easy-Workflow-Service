@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from django.http.response import Http404
+from django.shortcuts import get_object_or_404
 
 from rest_framework import status
 from rest_framework import permissions
@@ -24,7 +25,22 @@ class UserProfileList(APIView):
         serializer = UserProfileSerializer(data=request.DATA)
 
         if serializer.is_valid():
-            serializer.save()
+            # serializer.save()
+
+            # TODO: improve implementation in serializer
+            UserProfile.objects.create_user(
+                username=request.DATA.get('username'),
+                password=request.DATA.get('password'), 
+                email=request.DATA.get('email'), 
+                role=request.DATA.get('role'), 
+                first_name=request.DATA.get('first_name'), 
+                last_name=request.DATA.get('last_name'), 
+                protocol=request.DATA.get('protocol'), 
+                fone_number=request.DATA.get('fone_number'),
+                cel_number=request.DATA.get('cel_number'), 
+                is_active=True
+            )
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -89,14 +105,13 @@ class RequestListByUser(APIView):
     CANCELED_STATUS = 'canceled'
 
     def get_object(self, username):
-        try:
-            user = UserProfile.objects.filter(username=username).first()
-            requests_of_user = Request.objects.filter(who_executed=user.id).all()
-            
-            return requests_of_user
+        user = get_object_or_404(UserProfile, username=username)
 
-        except UserProfile.DoesNotExists:
+        if not user:
             raise Http404
+
+        requests_of_user = Request.objects.filter(who_executed=user.id).all()
+        return requests_of_user
 
     def get(self, request, username, format=None):
         requests_of_user = self.get_object(username)
@@ -122,7 +137,6 @@ class RequestListByUser(APIView):
                 canceled_tasks += 1
 
         total_of_tasks = {
-            'username': username,
             'realized': realized_tasks,
             'pending': pending_tasks,
             'delayed': delayed_tasks,
@@ -130,6 +144,25 @@ class RequestListByUser(APIView):
         }
 
         return Response(total_of_tasks)
+
+
+class RequestListByStatus(APIView):
+    
+    def get_object(self, username, status):
+        user = get_object_or_404(UserProfile, username=username)
+
+        if not user:
+            raise Http404
+
+        requests_of_user = Request.objects.filter(who_executed=user.id, status=status).all()
+        return requests_of_user
+
+    def get(self, request, username, status, format=None):
+        requests_of_user = self.get_object(username, status)
+
+        serializer = RequestSerializer(requests_of_user)
+
+        return Response(serializer.data)
 
 
 class RequestListAllByUser(APIView):
